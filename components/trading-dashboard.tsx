@@ -32,6 +32,9 @@ import {
   Sparkles,
   TrendingUp,
   Wallet,
+  Target,
+  Grid2X2,
+  ArrowUpDown,
   X,
 } from 'lucide-react'
 
@@ -49,6 +52,19 @@ const chartData = [
   { time: '14:30', price: 193.1, volume: 66 },
   { time: '15:00', price: 192.8, volume: 50 },
   { time: '15:30', price: 194.14, volume: 84 },
+]
+
+const tickPreview = [
+  { digit: 0, percent: '10.4%', tone: 'muted' },
+  { digit: 1, percent: '10.8%', tone: 'muted' },
+  { digit: 2, percent: '11.2%', tone: 'muted' },
+  { digit: 3, percent: '6.6%', tone: 'loss' },
+  { digit: 4, percent: '8.4%', tone: 'muted' },
+  { digit: 5, percent: '9.4%', tone: 'muted' },
+  { digit: 6, percent: '10.6%', tone: 'muted' },
+  { digit: 7, percent: '11.0%', tone: 'warning' },
+  { digit: 8, percent: '10.0%', tone: 'muted' },
+  { digit: 9, percent: '11.6%', tone: 'win' },
 ]
 
 const symbols = [
@@ -69,6 +85,7 @@ const indicators = [
 export function TradingDashboard() {
   const [selectedSymbol, setSelectedSymbol] = useState('AAPL')
   const [timeframe, setTimeframe] = useState('1D')
+  const [tradeType, setTradeType] = useState('Even/Odd')
   const [mobileNav, setMobileNav] = useState(false)
   const active = symbols.find((item) => item.ticker === selectedSymbol) ?? symbols[0]
   const chartColor = '#5eead4'
@@ -119,6 +136,15 @@ export function TradingDashboard() {
             <div className="rounded-xl border border-border bg-card"><div className="flex items-center justify-between border-b border-border p-4"><div><h2 className="text-sm font-semibold">Technical signals</h2><p className="mt-1 text-xs text-muted-foreground">{active.ticker} · {timeframe} timeframe</p></div><button className="rounded-md p-1.5 text-muted-foreground hover:bg-muted" aria-label="Configure indicators"><Settings2 className="size-4" /></button></div><div className="flex flex-col gap-1 p-3">{indicators.map((indicator) => <div key={indicator.label} className="flex items-center justify-between rounded-lg p-3 hover:bg-muted"><div><p className="text-xs font-medium">{indicator.label}</p><p className={`mt-1 text-[11px] ${indicator.tone === 'positive' ? 'text-primary' : indicator.tone === 'warning' ? 'text-warning' : 'text-muted-foreground'}`}>{indicator.note}</p></div><span className="font-mono text-sm font-semibold">{indicator.value}</span></div>)}</div><div className="mx-4 mb-4 rounded-lg bg-muted p-3"><div className="flex items-center gap-2 text-xs font-medium"><Sparkles className="size-3.5 text-primary" /> Signal summary</div><p className="mt-2 text-xs leading-5 text-muted-foreground">Momentum is positive, but RSI suggests the move may be extended near-term.</p></div></div>
           </div>
 
+          <div className="mt-4 rounded-xl border border-border bg-card p-2 md:p-3">
+            <div className="flex items-center justify-center gap-1 overflow-x-auto" role="tablist" aria-label="Trade types">
+              {['Matches/Differs', 'Even/Odd', 'Over/Under'].map((type) => <button key={type} role="tab" aria-selected={tradeType === type} onClick={() => setTradeType(type)} className={`flex shrink-0 items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition-colors ${tradeType === type ? 'bg-primary/10 text-foreground ring-1 ring-primary/20' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>{type === 'Even/Odd' ? <Grid2X2 className="size-4" /> : type === 'Matches/Differs' ? <Target className="size-4" /> : <ArrowUpDown className="size-4" />}<span>{type}</span></button>)}
+            </div>
+          </div>
+          <div className="mt-4 rounded-xl border border-border bg-card p-4 md:p-5">
+            <div className="mb-4 flex items-center justify-between"><div><h2 className="text-sm font-semibold">Last ticks</h2><p className="mt-1 text-xs text-muted-foreground">Digit distribution · {tradeType}</p></div><span className="rounded-md border border-border bg-muted px-2.5 py-1.5 text-xs font-medium text-muted-foreground">100%</span></div>
+            <div className="grid grid-cols-5 gap-3 sm:grid-cols-10">{tickPreview.map((tick) => <div key={tick.digit} className="relative flex flex-col items-center gap-1.5"><div className={`relative flex size-12 items-center justify-center rounded-full border-4 border-muted font-mono text-base font-semibold ${tick.tone === 'win' ? 'border-t-primary text-primary' : tick.tone === 'loss' ? 'border-t-destructive text-destructive' : tick.tone === 'warning' ? 'border-t-warning text-foreground' : 'border-t-border text-foreground'}`}><span>{tick.digit}</span></div><span className={`font-mono text-[11px] ${tick.tone === 'win' ? 'text-primary' : tick.tone === 'loss' ? 'text-destructive' : 'text-muted-foreground'}`}>{tick.percent}</span>{tick.tone === 'warning' && <span className="absolute -bottom-3 text-warning">▼</span>}</div>)}</div>
+          </div>
           <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]"><Watchlist selectedSymbol={selectedSymbol} onSelect={setSelectedSymbol} /><BacktestCard /></div>
         </section>
       </div>
